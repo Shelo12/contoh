@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulir Registrasi</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 90%; /* Lebar kontainer */
+            max-width: 800px; /* Maksimal lebar kontainer */
+        }
+
+        h2 {
+            text-align: center; /* Mengatur judul di tengah */
+            margin-bottom: 20px; /* Margin bawah untuk pemisahan */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background-color: #fff;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: center; /* Mengatur judul kolom menjadi di tengah */
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group input[type="submit"], 
+        .form-group button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-group input[type="submit"] {
+            background-color: navy;
+            color: white;
+        }
+
+        .form-group input[type="submit"]:hover {
+            background-color: darkblue;
+        }
+
+        .form-group button {
+            background-color: navy;
+            color: white;
+        }
+
+        .form-group button:hover {
+            background-color: darkblue;
+        }
+
+        /* Styling untuk upload foto */
+        .photo-upload {
+            width: 110px; /* Lebar kotak foto */
+            height: 170px; /* Tinggi kotak foto */
+            border: 1px solid #000; /* Garis batas kotak */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-bottom: 20px;
+            background-color: #f9f9f9; /* Warna latar belakang */
+        }
+
+        .photo-upload label {
+            position: absolute;
+            top: 50%; /* Menempatkan label di tengah secara vertikal */
+            left: 50%; /* Menempatkan label di tengah secara horizontal */
+            transform: translate(-50%, -50%); /* Menggunakan transform untuk menggeser ke tengah */
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-align: center; /* Mengatur teks ke tengah */
+        }
+
+        .photo-upload img {
+            width: 100%; /* Membuat gambar memenuhi kotak */
+            height: 100%; /* Memastikan gambar mengisi tinggi */
+            object-fit: cover; /* Mempertahankan rasio aspek */
+            display: none; /* Menyembunyikan gambar sampai diunggah */
+        }
+
+        .photo-filename {
+            margin-top: 10px;
+            font-weight: bold; /* Membuat nama file menjadi tebal */
+            text-align: center; /* Menyusun teks nama file di tengah */
+        }
+
+        .left-form {
+            display: flex;
+        }
+
+        .left-form-content {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .left-form-content label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-align: left; /* Mengatur label tidak di tengah */
+        }
+
+        .left-form-content input,
+        .left-form-content select {
+            width: 90%; /* Mengurangi lebar isian */
+            padding: 8px;
+            margin: 0 auto 10px; /* Mengatur margin agar rata tengah */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: block; /* Mengatur agar input menjadi block element */
+        }
+
+        .file-upload {
+            display: none; /* Input file tersembunyi hingga pilihan 'Ya' */
+            margin-top: 10px; /* Margin atas untuk pemisahan */
+        }
+    </style>
+    <script>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const img = document.querySelector('.photo-upload img');
+            const filenameDisplay = document.querySelector('.photo-filename');
+            const reader = new FileReader();
+            reader.onload = function() {
+                img.src = reader.result;
+                img.style.display = 'block'; // Menampilkan gambar setelah diunggah
+                filenameDisplay.textContent = file.name; // Menampilkan nama file
+            }
+            if (file) {
+                reader.readAsDataURL(file);
+            } else {
+                img.src = 'path_to_default_image.jpg'; // Ganti dengan path gambar default jika tidak ada file yang dipilih
+                img.style.display = 'flex'; // Menyembunyikan gambar jika tidak ada file
+                filenameDisplay.textContent = ''; // Mengosongkan nama file
+            }
+        }
+
+        function validateForm() {
+            const radios = document.querySelectorAll('input[type="radio"]');
+            let valid = true;
+            const groups = {
+                'id_card': false,
+                'evidence': false,
+                'lab_result': false,
+                'police_report': false,
+                'screenshot': false
+            };
+
+            radios.forEach(radio => {
+                if (radio.checked) {
+                    groups[radio.name] = true;
+                }
+            });
+
+            // Memeriksa setiap grup untuk memastikan opsi dipilih dan file diunggah jika 'Ya'
+            for (const group in groups) {
+                const fileInput = document.querySelector(`input[name="${group}_file"]`);
+                if (!groups[group]) {
+                    valid = false;
+                    alert('Mohon pilih salah satu opsi untuk semua dokumen.');
+                    return false;
+                }
+                if (document.querySelector(`input[name="${group}"]:checked`).value === "Ya" && !fileInput.value) {
+                    valid = false;
+                    alert(`Mohon unggah berkas untuk ${group.replace(/_/g, ' ').toUpperCase()}.`);
+                    return false;
+                }
+            }
+            return true; // Semua grup sudah divalidasi
+        }
+
+        function toggleFileUpload(radio) {
+            const fileUpload = radio.closest('tr').querySelector('.file-upload');
+            const fileInput = fileUpload.querySelector('input[type="file"]');
+
+            // Menampilkan atau menyembunyikan input file
+            fileUpload.style.display = radio.value === "Ya" ? 'block' : 'none';
+
+            // Menghapus atribut required jika memilih "Tidak", menambahkannya jika memilih "Ya"
+            if (radio.value === "Ya") {
+                fileInput.setAttribute('required', 'required'); // Membuat file upload wajib diisi
+            } else {
+                fileInput.removeAttribute('required'); // Menghapus keharusan upload file
+            }
+        }
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h2>Formulir Registrasi</h2>
+
+    <form action="hasil1.php" method="post" enctype="multipart/form-data" onsubmit="return validateForm();">
+        <div class="left-form">
+            <!-- Input form sisi kiri -->
+            <div class="left-form-content">
+                <label for="suspect_name">Nama Tersangka</label>
+                <input type="text" id="suspect_name" name="suspect_name" required>
+
+                <label for="submitter_name">Nama Pengaju</label>
+                <input type="text" id="submitter_name" name="submitter_name" required>
+
+                <label for="organization">Instansi</label>
+                <input type="text" id="organization" name="organization" required>
+
+                <label for="position">Jabatan</label>
+                <input type="text" id="position" name="position" required>
+
+                <label for="date">Tanggal</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+
+            <!-- Upload foto di sisi kanan -->
+            <div class="photo-upload">
+                <label for="photo">Upload Foto</label>
+                <input type="file" id="photo" name="photo" accept="image/*" required onchange="previewImage(event)" style="display: none;">
+                <img src="path_to_default_image.jpg" alt="Foto Tersangka">
+                <div class="photo-filename"></div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Dokumen</th>
+                    <th>Ya</th>
+                    <th>Tidak</th>
+                    <th>Unggah Berkas</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><label for="id_card">KTP</label></td>
+                    <td><input type="radio" id="id_card_yes" name="id_card" value="Ya" onclick="toggleFileUpload(this)"></td>
+                    <td><input type="radio" id="id_card_no" name="id_card" value="Tidak" onclick="toggleFileUpload(this)"></td>
+                    <td>
+                        <input type="file" name="id_card_file" class="file-upload" accept=".pdf,.jpg,.png" style="display: none;">
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="evidence">Barang Bukti</label></td>
+                    <td><input type="radio" id="evidence_yes" name="evidence" value="Ya" onclick="toggleFileUpload(this)"></td>
+                    <td><input type="radio" id="evidence_no" name="evidence" value="Tidak" onclick="toggleFileUpload(this)"></td>
+                    <td>
+                        <input type="file" name="evidence_file" class="file-upload" accept=".pdf,.jpg,.png" style="display: none;">
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="lab_result">Hasil Lab</label></td>
+                    <td><input type="radio" id="lab_result_yes" name="lab_result" value="Ya" onclick="toggleFileUpload(this)"></td>
+                    <td><input type="radio" id="lab_result_no" name="lab_result" value="Tidak" onclick="toggleFileUpload(this)"></td>
+                    <td>
+                        <input type="file" name="lab_result_file" class="file-upload" accept=".pdf,.jpg,.png" style="display: none;">
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="police_report">Laporan Polisi</label></td>
+                    <td><input type="radio" id="police_report_yes" name="police_report" value="Ya" onclick="toggleFileUpload(this)"></td>
+                    <td><input type="radio" id="police_report_no" name="police_report" value="Tidak" onclick="toggleFileUpload(this)"></td>
+                    <td>
+                        <input type="file" name="police_report_file" class="file-upload" accept=".pdf,.jpg,.png" style="display: none;">
+                    </td>
+                </tr>
+                <tr>
+                    <td><label for="screenshot">Screenshot Percakapan</label></td>
+                    <td><input type="radio" id="screenshot_yes" name="screenshot" value="Ya" onclick="toggleFileUpload(this)"></td>
+                    <td><input type="radio" id="screenshot_no" name="screenshot" value="Tidak" onclick="toggleFileUpload(this)"></td>
+                    <td>
+                        <input type="file" name="screenshot_file" class="file-upload" accept=".pdf,.jpg,.png" style="display: none;">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="form-group">
+            <button type="button" onclick="window.location.href='home.php';">Batal</button>
+            <input type="submit" value="Daftar">
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
